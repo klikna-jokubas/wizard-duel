@@ -6,7 +6,6 @@ from game import Game
 
 
 def main():
-    # langas
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Wizard Duel")
 

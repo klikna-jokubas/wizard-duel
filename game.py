@@ -8,7 +8,6 @@ from spells import Spell
 
 class Game:
     def __init__(self):
-        # du magai
         self.player = Wizard(
             "Player", 150, 260, (50, 80, 200), "player_mage.png"
         )  # mėlynas
@@ -29,7 +28,6 @@ class Game:
         self.current_turn = "player"
         self.message_log: list[str] = ["Kova prasidėjo!"]
 
-        # kai žaidimas prasideda, taikom efektus žaidėjui (pirmo ėjimo pradžia)
         self.player.process_effects_start_of_turn(self.message_log)
 
         self.game_over = False
@@ -57,7 +55,6 @@ class Game:
         if self.game_over:
             return
 
-        # paprastas AI
         available_spells = [
             s for s in self.enemy.spells if s.mana_cost <= self.enemy.mana
         ]
@@ -76,23 +73,21 @@ class Game:
         text = self.enemy.cast_spell(self.player, spell)
         self.add_message(text)
 
-    # --- INPUT'AS IŠ ŽAIDĖJO ---
+    # --- INPUT IŠ ŽAIDĖJO ---
 
     def handle_player_input(self, event):
         if event.type != pygame.KEYDOWN:
             return
 
-        # restart jei game over
         if self.game_over:
             if event.key == pygame.K_r:
-                self.__init__()  # restartinam visą Game
+                self.__init__()
             return
 
         # jeigu ne žaidėjo eilė – ignoruojam klavišus
         if self.current_turn != "player":
             return
 
-        # 1,2,3... burtų pasirinkimas
         if pygame.K_1 <= event.key <= pygame.K_9:
             index = event.key - pygame.K_1
             if index < len(self.player.spells):
@@ -102,14 +97,12 @@ class Game:
                 self.check_game_over()
 
                 if not self.game_over:
-                    # pereinam prie enemy ėjimo
-                    self.next_turn()  # dabar current_turn == "enemy"
+                    self.next_turn()
                     self.enemy_turn()
                     self.check_game_over()
 
                 if not self.game_over:
-                    # grąžinam eilę žaidėjui
-                    self.next_turn()  # dabar current_turn == "player"
+                    self.next_turn()
 
     # --- ŽAIDIMO BŪSENA ---
 

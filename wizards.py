@@ -21,13 +21,10 @@ class Wizard:
         self.width = 80
         self.height = 120
 
-        # kombo info
         self.last_spell_name = None
 
-        # status efektai (nuodai, nutildymas, ir t.t.)
         self.effects: list[StatusEffect] = []
 
-        # sprite (paveikslėlis)
         self.sprite = None
         if sprite_path is not None:
             full_path = os.path.join("assets", sprite_path)
@@ -47,25 +44,20 @@ class Wizard:
         return self.hp > 0
 
     def cast_spell(self, target: "Wizard", spell) -> str:
-        """Pritaiko burto efektus ir grąžina tekstą logui."""
 
-        # Nutildymas: magas negali naudoti burtų
         if self.has_effect("Silence"):
             return f"{self.name} yra nutildytas ir negali naudoti burtų!"
 
-        # Mana check
         if self.mana < spell.mana_cost:
             return f"{self.name} bandė panaudoti {spell.name}, bet neturi pakankamai mannos!"
 
         self.mana -= spell.mana_cost
         text_parts = [f"{self.name} panaudojo {spell.name}!"]
 
-        # --- KOMBO SINERGIJA ---
         combo_bonus = 0
         if self.last_spell_name == "Ice Spike" and spell.name == "Fireball":
-            combo_bonus = 5  # pvz. +5 žalos už kombo
+            combo_bonus = 5
 
-        # ŽALA
         if spell.damage > 0:
             total_damage = spell.damage + combo_bonus
             target.hp -= total_damage
@@ -82,26 +74,23 @@ class Wizard:
                 self.hp = self.max_hp
             text_parts.append(f"+{spell.heal} HP {self.name}.")
 
-        # atsimenam paskutinį burtą kombo logikai
         self.last_spell_name = spell.name
+        self.mana += 2
 
         return " ".join(text_parts)
 
     # --- PIEŠIMAS ---
 
     def draw(self, surface):
-        # magas – sprite arba fallback stačiakampis
         if self.sprite is not None:
             surface.blit(self.sprite, (self.x, self.y))
         else:
             rect = pygame.Rect(self.x, self.y, self.width, self.height)
             pygame.draw.rect(surface, self.color, rect)
 
-        # vardas
         name_surf = FONT.render(self.name, True, WHITE)
         surface.blit(name_surf, (self.x, self.y - 25))
 
-        # HP / MP juostos
         self._draw_bar(
             surface, self.hp, self.max_hp, self.x, self.y + self.height + 5, RED, "HP"
         )
@@ -120,9 +109,7 @@ class Wizard:
         bar_height = 12
         ratio = value / max_value if max_value > 0 else 0
 
-        # fonas
         pygame.draw.rect(surface, GREY, (x, y, bar_width, bar_height))
-        # užpildymas
         pygame.draw.rect(surface, color, (x, y, int(bar_width * ratio), bar_height))
 
         text = FONT.render(f"{label}: {value}/{max_value}", True, WHITE)
@@ -131,15 +118,12 @@ class Wizard:
     # --- STATUS EFEKTAI ---
 
     def add_effect(self, effect: StatusEffect):
-        """Prideda naują status efektą (nuodai, nutildymas ir t.t.)."""
         self.effects.append(effect)
 
     def has_effect(self, name: str) -> bool:
         return any(e.name == name and not e.is_expired() for e in self.effects)
 
     def process_effects_start_of_turn(self, log: list[str]):
-        """Kviečiama ėjimo pradžioje – apdoroja nuodus, nutildymą ir pan."""
         for effect in list(self.effects):
             effect.on_turn_start(self, log)
-        # išvalom pasibaigusius
         self.effects = [e for e in self.effects if not e.is_expired()]

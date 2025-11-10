@@ -1,11 +1,9 @@
-# effects.py
 class StatusEffect:
     def __init__(self, name: str, duration: int):
         self.name = name
-        self.duration = duration  # kiek ėjimų liko
+        self.duration = duration
 
     def on_turn_start(self, owner, log: list[str]):
-        """Kas nutinka ėjimo pradžioje (override'inama vaikų klasėse)."""
         pass
 
     def is_expired(self) -> bool:
@@ -30,6 +28,5 @@ class SilenceEffect(StatusEffect):
         super().__init__("Silence", duration)
 
     def on_turn_start(self, owner, log: list[str]):
-        # Tiesiog mažinam trukmę, pats efektas naudojamas kitur
         log.append(f"{owner.name} yra nutildytas ({self.duration} ėjimai liko).")
         self.duration -= 1
