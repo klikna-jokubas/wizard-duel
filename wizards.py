@@ -2,7 +2,7 @@ import pygame
 import os
 
 from settings import FONT, WHITE, GREY, RED, BLUE
-from effects import PoisonEffect, StatusEffect
+from effects import StatusEffect, PoisonEffect, SilenceEffect   
 
 
 class Wizard:
@@ -76,6 +76,10 @@ class Wizard:
             if self.hp > self.max_hp:
                 self.hp = self.max_hp
             text_parts.append(f"+{spell.heal} HP {self.name}.")
+
+        if spell.name == "Silence Potion":
+            target.add_effect(SilenceEffect(duration=2))
+            text_parts.append(f"{target.name} yra nutildytas 2 ėjimams!")
 
         self.last_spell_name = spell.name
         self.mana += 2

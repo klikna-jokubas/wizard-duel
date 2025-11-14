@@ -22,7 +22,6 @@ class PoisonEffect(StatusEffect):
         log.append(f"{owner.name} kenčia nuo nuodų! -{self.damage_per_turn} HP.")
         self.duration -= 1
 
-
 class SilenceEffect(StatusEffect):
     def __init__(self, duration: int):
         super().__init__("Silence", duration)
