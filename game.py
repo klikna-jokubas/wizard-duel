@@ -19,11 +19,13 @@ class Game:
         fireball = Spell("Fireball", damage=10, heal=0, mana_cost=4)
         ice_spike = Spell("Ice Spike", damage=6, heal=0, mana_cost=3)
         heal = Spell("Heal", damage=0, heal=7, mana_cost=5)
+        lightning = Spell("Lightning Bolt", damage=12, heal=0, mana_cost=6)
 
         for wiz in (self.player, self.enemy):
             wiz.add_spell(fireball)
             wiz.add_spell(ice_spike)
             wiz.add_spell(heal)
+            wiz.add_spell(lightning)
 
         self.current_turn = "player"
         self.message_log: list[str] = ["Kova prasidėjo!"]

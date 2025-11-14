@@ -2,7 +2,7 @@ import pygame
 import os
 
 from settings import FONT, WHITE, GREY, RED, BLUE
-from effects import StatusEffect
+from effects import PoisonEffect, StatusEffect
 
 
 class Wizard:
@@ -47,6 +47,9 @@ class Wizard:
 
         if self.has_effect("Silence"):
             return f"{self.name} yra nutildytas ir negali naudoti burtų!"
+        
+        if spell.name == "Fireball":
+            target.add_effect(PoisonEffect(damage_per_turn=3, duration=3))
 
         if self.mana < spell.mana_cost:
             return f"{self.name} bandė panaudoti {spell.name}, bet neturi pakankamai mannos!"
