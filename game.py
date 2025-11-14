@@ -41,7 +41,6 @@ class Game:
             self.message_log.pop(0)
 
     def next_turn(self):
-        """Perjungia eilę ir pritaiko status efektus naujam veikėjui."""
         if self.current_turn == "player":
             self.current_turn = "enemy"
             self.enemy.process_effects_start_of_turn(self.message_log)

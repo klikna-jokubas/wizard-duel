@@ -3,7 +3,7 @@ import pygame
 pygame.init()
 
 # Langas
-WIDTH, HEIGHT = 1300, 1000
+WIDTH, HEIGHT = 1100, 800
 
 # Spalvos
 WHITE = (255, 255, 255)
