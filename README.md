@@ -24,5 +24,6 @@ cd wizard-duel
 
 ```bash
 pip install pygame
+pip install pytest
 python main.py
 ```
