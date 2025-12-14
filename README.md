@@ -7,6 +7,7 @@ Du burtininkai paeiliui meta burtus, gydo save arba taiko taktiką, kol vienas i
 
 - **Python 3.12+**
 - **Pygame 2.6+**
+- **PYTEST**
 
 ---
 
