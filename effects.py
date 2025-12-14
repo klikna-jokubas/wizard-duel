@@ -16,10 +16,10 @@ class PoisonEffect(StatusEffect):
         self.damage_per_turn = damage_per_turn
 
     def on_turn_start(self, owner, log: list[str]):
-        owner.hp -= self.damage_per_turn
-        if owner.hp < 0:
-            owner.hp = 0
-        log.append(f"{owner.name} kenčia nuo nuodų! -{self.damage_per_turn} HP.")
+        owner.take_damage(self.damage_per_turn)
+        log.append(
+            f"{owner.name} kenčia nuo nuodų! -{self.damage_per_turn} HP."
+        )
         self.duration -= 1
 
 class SilenceEffect(StatusEffect):
@@ -27,5 +27,7 @@ class SilenceEffect(StatusEffect):
         super().__init__("Silence", duration)
 
     def on_turn_start(self, owner, log: list[str]):
-        log.append(f"{owner.name} yra nutildytas ({self.duration} ėjimai liko).")
+        log.append(
+            f"{owner.name} yra nutildytas ({self.duration} ėjimai liko)."
+        )
         self.duration -= 1

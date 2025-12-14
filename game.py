@@ -1,21 +1,24 @@
-import random
 import pygame
 
 from settings import WIDTH, HEIGHT, FONT, BIG_FONT, WHITE, GREEN, RED
-from wizards import Wizard
 from spells import Spell
+from player_wizard import PlayerWizard
+from enemy_wizard import EnemyWizard
+from characters import Character
 
 
 class Game:
     def __init__(self):
-        self.player = Wizard(
-            "Player", 150, 260, (50, 80, 200), "player_mage.png"
-        )  # mėlynas
-        self.enemy = Wizard(
-            "Enemy", 750, 260, (200, 50, 50), "player_mage.png"
-        )  # raudonas
 
-        # burtai
+        self.player: Character = PlayerWizard(
+            "Player", 150, 260, (50, 80, 200), "player_mage.png"
+        )
+
+        self.enemy: Character = EnemyWizard(
+            "Enemy", 750, 260, (200, 50, 50), "player_mage.png"
+        )
+
+        # --- Burtai ---
         fireball = Spell("Fireball", damage=10, heal=0, mana_cost=4)
         ice_spike = Spell("Ice Spike", damage=6, heal=0, mana_cost=3)
         heal = Spell("Heal", damage=0, heal=7, mana_cost=5)
@@ -37,7 +40,6 @@ class Game:
         self.game_over = False
         self.winner = None
 
-    # --- PAGALBINIAI METODAI ---
 
     def add_message(self, msg: str):
         self.message_log.append(msg)
@@ -52,62 +54,29 @@ class Game:
             self.current_turn = "player"
             self.player.process_effects_start_of_turn(self.message_log)
 
-    # --- ENEMY AI ---
-
-    def enemy_turn(self):
-        if self.game_over:
-            return
-
-        available_spells = [
-            s for s in self.enemy.spells if s.mana_cost <= self.enemy.mana
-        ]
-        if not available_spells:
-            self.add_message(f"{self.enemy.name} neturi mannos burtams!")
-            return
-
-        spell = random.choice(available_spells)
-
-        # jei mažai HP, dažniau heal
-        if self.enemy.hp < 15:
-            heal_spells = [s for s in available_spells if s.heal > 0]
-            if heal_spells and random.random() < 0.6:
-                spell = random.choice(heal_spells)
-
-        text = self.enemy.cast_spell(self.player, spell)
-        self.add_message(text)
-
-    # --- INPUT IŠ ŽAIDĖJO ---
+    # Input iš žaidėjo (polymorphism)
 
     def handle_player_input(self, event):
-        if event.type != pygame.KEYDOWN:
-            return
-
         if self.game_over:
-            if event.key == pygame.K_r:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_r:
                 self.__init__()
             return
 
-        # jeigu ne žaidėjo eilė – ignoruojam klavišus
-        if self.current_turn != "player":
-            return
+        if self.current_turn == "player":
+            finished = self.player.take_turn(self, event)
 
-        if pygame.K_1 <= event.key <= pygame.K_9:
-            index = event.key - pygame.K_1
-            if index < len(self.player.spells):
-                spell = self.player.spells[index]
-                text = self.player.cast_spell(self.enemy, spell)
-                self.add_message(text)
+            if finished:
                 self.check_game_over()
 
                 if not self.game_over:
                     self.next_turn()
-                    self.enemy_turn()
+                    self.enemy.take_turn(self)
                     self.check_game_over()
 
-                if not self.game_over:
-                    self.next_turn()
+                    if not self.game_over:
+                        self.next_turn()
 
-    # --- ŽAIDIMO BŪSENA ---
+    # Žaidimo būsena
 
     def check_game_over(self):
         if not self.player.is_alive():
@@ -119,7 +88,7 @@ class Game:
             self.winner = self.player.name
             self.add_message("Tu laimėjai!")
 
-    # --- PIEŠIMAS ---
+    # Piešimas
 
     def draw_spell_list(self, surface):
         y = HEIGHT - 160
@@ -129,7 +98,10 @@ class Game:
         y += 25
 
         for i, spell in enumerate(self.player.spells):
-            text = f"{i+1}. {spell.name} (Dmg:{spell.damage}, Heal:{spell.heal}, Mana:{spell.mana_cost})"
+            text = (
+                f"{i+1}. {spell.name} "
+                f"(Dmg:{spell.damage}, Heal:{spell.heal}, Mana:{spell.mana_cost})"
+            )
             surf = FONT.render(text, True, WHITE)
             surface.blit(surf, (x, y))
             y += 20
@@ -160,11 +132,17 @@ class Game:
             True,
             GREEN if self.winner == self.player.name else RED,
         )
-        text_rect = text_surf.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 20))
+        text_rect = text_surf.get_rect(
+            center=(WIDTH // 2, HEIGHT // 2 - 20)
+        )
         surface.blit(text_surf, text_rect)
 
-        info_surf = FONT.render("Spausk R, kad pradėtum iš naujo", True, WHITE)
-        info_rect = info_surf.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 20))
+        info_surf = FONT.render(
+            "Spausk R, kad pradėtum iš naujo", True, WHITE
+        )
+        info_rect = info_surf.get_rect(
+            center=(WIDTH // 2, HEIGHT // 2 + 20)
+        )
         surface.blit(info_surf, info_rect)
 
     def draw(self, surface):

@@ -2,105 +2,146 @@ import pygame
 import os
 
 from settings import FONT, WHITE, GREY, RED, BLUE
-from effects import StatusEffect, PoisonEffect, SilenceEffect   
+from effects import PoisonEffect, SilenceEffect
+from characters import Character
+
+MANA_REGEN = 2
+ICE_FIRE_COMBO_BONUS = 5
+POISON_DAMAGE = 3
+POISON_DURATION = 3
+SILENCE_DURATION = 2
 
 
-class Wizard:
+class Wizard(Character):
     def __init__(self, name, x, y, color, sprite_path=None):
-        self.name = name
-        self.max_hp = 50
-        self.hp = 50
-        self.max_mana = 30
-        self.mana = 30
-        self.spells = []
+        super().__init__(name=name, max_hp=50)
 
-        # piešimui
+        self._max_mana = 30
+        self._mana = 30
+
+        self.spells: list = []
+        self._last_spell_name: str | None = None
+
         self.x = x
         self.y = y
         self.color = color
         self.width = 80
         self.height = 120
 
-        self.last_spell_name = None
-
-        self.effects: list[StatusEffect] = []
-
         self.sprite = None
-        if sprite_path is not None:
-            full_path = os.path.join("assets", sprite_path)
-            try:
-                image = pygame.image.load(full_path).convert_alpha()
-                self.sprite = pygame.transform.scale(image, (self.width, self.height))
-            except pygame.error as e:
-                print(f"Nepavyko užkrauti sprite '{full_path}': {e}")
-                self.sprite = None
+        if sprite_path:
+            self._load_sprite(sprite_path)
 
-    # --- LOGIKA ---
+    # Encapsulation – getteriai
+
+    @property
+    def mana(self) -> int:
+        return self._mana
+
+    @property
+    def max_mana(self) -> int:
+        return self._max_mana
+
+    # Mana valdymas
+
+    def spend_mana(self, amount: int) -> bool:
+        if self._mana < amount:
+            return False
+        self._mana -= amount
+        return True
+
+    def restore_mana(self, amount: int):
+        self._mana += amount
+        if self._mana > self._max_mana:
+            self._mana = self._max_mana
+
+    # Burtai
 
     def add_spell(self, spell):
         self.spells.append(spell)
 
-    def is_alive(self) -> bool:
-        return self.hp > 0
-
     def cast_spell(self, target: "Wizard", spell) -> str:
-
         if self.has_effect("Silence"):
             return f"{self.name} yra nutildytas ir negali naudoti burtų!"
-        
-        if spell.name == "Fireball":
-            target.add_effect(PoisonEffect(damage_per_turn=3, duration=3))
 
-        if self.mana < spell.mana_cost:
+        if not self.spend_mana(spell.mana_cost):
             return f"{self.name} bandė panaudoti {spell.name}, bet neturi pakankamai mannos!"
 
-        self.mana -= spell.mana_cost
-        text_parts = [f"{self.name} panaudojo {spell.name}!"]
+        log = [f"{self.name} panaudojo {spell.name}!"]
 
-        combo_bonus = 0
-        if self.last_spell_name == "Ice Spike" and spell.name == "Fireball":
-            combo_bonus = 5
-
-        if spell.damage > 0:
-            total_damage = spell.damage + combo_bonus
-            target.hp -= total_damage
-            if target.hp < 0:
-                target.hp = 0
-            text_parts.append(f"-{total_damage} HP {target.name}.")
-            if combo_bonus > 0:
-                text_parts.append(f"Kombo! +{combo_bonus} papildomos žalos.")
-
-        # GYDYMAS
-        if spell.heal > 0:
-            self.hp += spell.heal
-            if self.hp > self.max_hp:
-                self.hp = self.max_hp
-            text_parts.append(f"+{spell.heal} HP {self.name}.")
+        # --- Status efektai ---
+        if spell.name == "Fireball":
+            target.add_effect(
+                PoisonEffect(
+                    damage_per_turn=POISON_DAMAGE,
+                    duration=POISON_DURATION,
+                )
+            )
 
         if spell.name == "Silence Potion":
-            target.add_effect(SilenceEffect(duration=2))
-            text_parts.append(f"{target.name} yra nutildytas 2 ėjimams!")
+            target.add_effect(SilenceEffect(duration=SILENCE_DURATION))
+            log.append(f"{target.name} yra nutildytas {SILENCE_DURATION} ėjimams!")
 
-        self.last_spell_name = spell.name
-        self.mana += 2
+        # --- Kombo ---
+        combo_bonus = self._calculate_combo_bonus(spell)
 
-        return " ".join(text_parts)
+        # --- Žala ---
+        if spell.damage > 0:
+            total_damage = spell.damage + combo_bonus
+            target.take_damage(total_damage)
+            log.append(f"-{total_damage} HP {target.name}.")
+            if combo_bonus > 0:
+                log.append(f"Kombo! +{combo_bonus} papildomos žalos.")
 
-    # --- PIEŠIMAS ---
+        # --- Gydymas ---
+        if spell.heal > 0:
+            self.heal(spell.heal)
+            log.append(f"+{spell.heal} HP {self.name}.")
+
+        self._last_spell_name = spell.name
+        self.restore_mana(MANA_REGEN)
+
+        return " ".join(log)
+
+    def _calculate_combo_bonus(self, spell) -> int:
+        if self._last_spell_name == "Ice Spike" and spell.name == "Fireball":
+            return ICE_FIRE_COMBO_BONUS
+        return 0
+
+    # Polymorphism – abstraktaus metodo realizacija
+
+    def take_turn(self):
+        """
+        Realus elgesys apibrėžiamas Game / AI logikoje.
+        Metodas reikalingas polymorphism + abstraction.
+        """
+        pass
+
+    # Piešimas
 
     def draw(self, surface):
-        if self.sprite is not None:
+        if self.sprite:
             surface.blit(self.sprite, (self.x, self.y))
         else:
-            rect = pygame.Rect(self.x, self.y, self.width, self.height)
-            pygame.draw.rect(surface, self.color, rect)
+            pygame.draw.rect(
+                surface,
+                self.color,
+                pygame.Rect(self.x, self.y, self.width, self.height),
+            )
 
         name_surf = FONT.render(self.name, True, WHITE)
         surface.blit(name_surf, (self.x, self.y - 25))
 
         self._draw_bar(
-            surface, self.hp, self.max_hp, self.x, self.y + self.height + 5, RED, "HP"
+            surface,
+            self.hp,
+            self.max_hp,
+            self.x,
+            self.y + self.height + 5,
+            RED,
+            "HP",
         )
+
         self._draw_bar(
             surface,
             self.mana,
@@ -122,15 +163,15 @@ class Wizard:
         text = FONT.render(f"{label}: {value}/{max_value}", True, WHITE)
         surface.blit(text, (x, y - 18))
 
-    # --- STATUS EFEKTAI ---
+    # Sprite
 
-    def add_effect(self, effect: StatusEffect):
-        self.effects.append(effect)
-
-    def has_effect(self, name: str) -> bool:
-        return any(e.name == name and not e.is_expired() for e in self.effects)
-
-    def process_effects_start_of_turn(self, log: list[str]):
-        for effect in list(self.effects):
-            effect.on_turn_start(self, log)
-        self.effects = [e for e in self.effects if not e.is_expired()]
+    def _load_sprite(self, sprite_path: str):
+        full_path = os.path.join("assets", sprite_path)
+        try:
+            image = pygame.image.load(full_path).convert_alpha()
+            self.sprite = pygame.transform.scale(
+                image, (self.width, self.height)
+            )
+        except pygame.error as e:
+            print(f"Nepavyko užkrauti sprite '{full_path}': {e}")
+            self.sprite = None
