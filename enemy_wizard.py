@@ -1,5 +1,6 @@
 import random
 from wizards import Wizard
+from ai_strategy import DefaultAIStrategy
 
 LOW_HP_THRESHOLD = 15
 
@@ -17,13 +18,5 @@ class EnemyWizard(Wizard):
             game.add_message(f"{self.name} neturi mannos burtams!")
             return True
 
-        spell = random.choice(available_spells)
+        self.strategy = DefaultAIStrategy()
 
-        if self.hp < LOW_HP_THRESHOLD:
-            heal_spells = [s for s in available_spells if s.heal > 0]
-            if heal_spells and random.random() < 0.6:
-                spell = random.choice(heal_spells)
-
-        text = self.cast_spell(game.player, spell)
-        game.add_message(text)
-        return True

@@ -42,8 +42,6 @@ class Wizard(Character):
     def max_mana(self) -> int:
         return self._max_mana
 
-    # Mana valdymas
-
     def spend_mana(self, amount: int) -> bool:
         if self._mana < amount:
             return False
@@ -54,8 +52,6 @@ class Wizard(Character):
         self._mana += amount
         if self._mana > self._max_mana:
             self._mana = self._max_mana
-
-    # Burtai
 
     def add_spell(self, spell):
         self.spells.append(spell)
@@ -69,7 +65,6 @@ class Wizard(Character):
 
         log = [f"{self.name} panaudojo {spell.name}!"]
 
-        # --- Status efektai ---
         if spell.name == "Fireball":
             target.add_effect(
                 PoisonEffect(
@@ -82,10 +77,8 @@ class Wizard(Character):
             target.add_effect(SilenceEffect(duration=SILENCE_DURATION))
             log.append(f"{target.name} yra nutildytas {SILENCE_DURATION} ėjimams!")
 
-        # --- Kombo ---
         combo_bonus = self._calculate_combo_bonus(spell)
 
-        # --- Žala ---
         if spell.damage > 0:
             total_damage = spell.damage + combo_bonus
             target.take_damage(total_damage)
@@ -93,7 +86,6 @@ class Wizard(Character):
             if combo_bonus > 0:
                 log.append(f"Kombo! +{combo_bonus} papildomos žalos.")
 
-        # --- Gydymas ---
         if spell.heal > 0:
             self.heal(spell.heal)
             log.append(f"+{spell.heal} HP {self.name}.")
@@ -108,7 +100,7 @@ class Wizard(Character):
             return ICE_FIRE_COMBO_BONUS
         return 0
 
-    # Polymorphism – abstraktaus metodo realizacija
+    # Polymorphism 
 
     def take_turn(self):
         """
