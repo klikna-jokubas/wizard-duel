@@ -1,4 +1,4 @@
-🧙 Wizard Duel
+# 🧙 Wizard Duel
 
 **Wizard Duel** – tai paprastas „turn-based“ magų dvikovos žaidimas, sukurtas su **Python** ir **Pygame**.  
 Du burtininkai paeiliui meta burtus, gydo save arba taiko taktiką, kol vienas iš jų pralaimi.
@@ -7,6 +7,7 @@ Du burtininkai paeiliui meta burtus, gydo save arba taiko taktiką, kol vienas i
 
 - **Python 3.12+**
 - **Pygame 2.6+**
+- **PYTEST**
 
 ---
 
@@ -17,12 +18,12 @@ Du burtininkai paeiliui meta burtus, gydo save arba taiko taktiką, kol vienas i
 ```bash
 git clone https://github.com/<NAME>/wizard-duel.git
 cd wizard-duel
+```
 
 ## ⚡ Greitas paleidimas
 
 ```bash
 pip install pygame
+pip install pytest
 python main.py
-
-
-
+```
