@@ -4,9 +4,6 @@ from wizards import Wizard
 
 class PlayerWizard(Wizard):
     def take_turn(self, game, event=None):
-        """
-        Žaidėjo ėjimas priklauso nuo klavišo paspaudimo
-        """
         if event is None or event.type != pygame.KEYDOWN:
             return False
 

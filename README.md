@@ -26,4 +26,5 @@ cd wizard-duel
 pip install pygame
 pip install pytest
 python main.py
+pytest
 ```

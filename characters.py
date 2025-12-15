@@ -25,7 +25,7 @@ class Character(ABC):
     def is_alive(self) -> bool:
         return self._hp > 0
 
-    # --- Bendra logika ---
+    
 
     def take_damage(self, amount: int):
         self._hp -= amount
@@ -51,5 +51,4 @@ class Character(ABC):
     # --- Abstrakcija ---
     @abstractmethod
     def take_turn(self):
-        """Ką personažas daro savo ėjimo metu"""
         pass

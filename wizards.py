@@ -32,7 +32,7 @@ class Wizard(Character):
         if sprite_path:
             self._load_sprite(sprite_path)
 
-    # Encapsulation – getteriai
+    # Encapsulation 
 
     @property
     def mana(self) -> int:
@@ -102,13 +102,8 @@ class Wizard(Character):
     # Polymorphism 
 
     def take_turn(self):
-        """
-        Realus elgesys apibrėžiamas Game / AI logikoje.
-        Metodas reikalingas polymorphism + abstraction.
-        """
         pass
 
-    # Piešimas
 
     def draw(self, surface):
         if self.sprite:
@@ -154,7 +149,6 @@ class Wizard(Character):
         text = FONT.render(f"{label}: {value}/{max_value}", True, WHITE)
         surface.blit(text, (x, y - 18))
 
-    # Sprite
 
     def _load_sprite(self, sprite_path: str):
         full_path = os.path.join("assets", sprite_path)

@@ -20,7 +20,6 @@ class Game:
             "Enemy", 750, 260, (200, 50, 50), "player_mage.png"
         )
 
-        # --- Burtai ---
         for wiz in (self.player, self.enemy):
             for spell in SpellFactory.create_default_spells():
                 wiz.add_spell(spell)
@@ -72,8 +71,6 @@ class Game:
                     if not self.game_over:
                         self.next_turn()
 
-    # Žaidimo būsena
-
     def check_game_over(self):
         if not self.player.is_alive():
             self.game_over = True
@@ -84,7 +81,6 @@ class Game:
             self.winner = self.player.name
             self.add_message("Tu laimėjai!")
 
-    # Piešimas
 
     def draw_spell_list(self, surface):
         y = HEIGHT - 160
