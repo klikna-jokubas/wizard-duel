@@ -91,7 +91,6 @@ class Wizard(Character):
             log.append(f"+{spell.heal} HP {self.name}.")
 
         self._last_spell_name = spell.name
-        self.restore_mana(MANA_REGEN)
 
         return " ".join(log)
 

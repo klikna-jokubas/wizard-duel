@@ -1,22 +1,19 @@
-import random
 from wizards import Wizard
 from ai_strategy import DefaultAIStrategy
 
-LOW_HP_THRESHOLD = 15
-
 
 class EnemyWizard(Wizard):
-    def take_turn(self, game, event=None):
-        """
-        AI pats nusprendžia, ką daryti
-        """
-        available_spells = [
-            s for s in self.spells if s.mana_cost <= self.mana
-        ]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.strategy = DefaultAIStrategy()
 
-        if not available_spells:
+    def take_turn(self, game, event=None):
+        spell = self.strategy.choose_spell(self, game.player)
+
+        if spell is None:
             game.add_message(f"{self.name} neturi mannos burtams!")
             return True
 
-        self.strategy = DefaultAIStrategy()
-
+        text = self.cast_spell(game.player, spell)
+        game.add_message(text)
+        return True

@@ -7,6 +7,7 @@ from enemy_wizard import EnemyWizard
 from characters import Character
 from spell_factory import SpellFactory
 
+TURN_MANA_REGEN = 2
 
 class Game:
     def __init__(self):
@@ -42,9 +43,11 @@ class Game:
     def next_turn(self):
         if self.current_turn == "player":
             self.current_turn = "enemy"
+            self.enemy.restore_mana(TURN_MANA_REGEN)
             self.enemy.process_effects_start_of_turn(self.message_log)
         else:
             self.current_turn = "player"
+            self.player.restore_mana(TURN_MANA_REGEN)
             self.player.process_effects_start_of_turn(self.message_log)
 
     # Input iš žaidėjo (polymorphism)
